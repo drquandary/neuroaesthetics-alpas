@@ -1,46 +1,29 @@
-# basic imports
 import board
-
-# for the onboard light sensor
-# import analogio
-
-# for communication with the sensor
 import adafruit_bh1750
 import busio
 import digitalio
-
-# for running a task exactly every N minutes
 import time
-
-# for Internet capabilities
 import adafruit_requests
 import socketpool
 import ssl
 import wifi
+import json
 
-# email
-from circuitpython_email import smtp
-
-# WiFi info
 try:
     from secrets import secrets
 except ImportError:
     print("WiFi secrets are kept in secrets.py, please add them there!")
     raise
 
-
 def wait_5m(next_time: time.struct_time) -> time.struct_time:
-    # print("previous time:", next_time)
     year, mon, day, hour, min, sec, day_of_wk, day_of_yr, _ = next_time
     sec = 0
-    min = ((min // 5) + 1) * 5
+    min = ((min // 2) + 1) * 2
     next_time = time.struct_time(
         (year, mon, day, hour, min, sec, day_of_wk, day_of_yr, -1)
     )
-    # print("waiting until", next_time)
     time.sleep(max(0, time.mktime(next_time) - time.mktime(time.localtime())))
     return next_time
-
 
 led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
@@ -53,8 +36,6 @@ vin = digitalio.DigitalInOut(board.IO1)
 vin.direction = digitalio.Direction.OUTPUT
 vin.value = True
 
-# onboard_amb = analogio.AnalogIn(board.AMB)
-
 i2c = busio.I2C(board.SCL, board.SDA)
 sensor = adafruit_bh1750.BH1750(i2c, 0x23)
 
@@ -62,56 +43,30 @@ sslctx = ssl.create_default_context()
 
 while True:
     try:
-        print()
         print("Connecting to WiFi...")
-        print("MAC address is", [hex(i) for i in wifi.radio.mac_address])
-        print("All available WiFi networks:")
-        for network in wifi.radio.start_scanning_networks():
-            print(
-                '    "{}" (RSSI {}, Channel {})'.format(
-                    str(network.ssid, "utf-8"), network.rssi, network.channel
-                )
-            )
-        print("    [end of list]")
-        wifi.radio.stop_scanning_networks()
-
-        print("Connecting to %s..." % secrets["ssid"])
         wifi.radio.connect(secrets["ssid"], secrets["wifi_pw"])
         print("    Done! Sensor IP address:", wifi.radio.ipv4_address)
 
         pool = socketpool.SocketPool(wifi.radio)
-
-        # see https://learn.adafruit.com/pyportal-email-display/internet-connect
-        print("-" * 40)
-        print(
-            adafruit_requests.Session(pool, sslctx)
-            .get("http://wifitest.adafruit.com/testwifi/index.html")
-            .text
-        )
-        print("-" * 40)
-
-        smtp_socket = sslctx.wrap_socket(pool.socket())
-        smtp.init_connection(smtp_socket)
-        smtp.send(
-            socket=smtp_socket,
-            to=secrets["email"],  # email ourselves!
-            subject="Hello, World!",
-            body="Hello from your CircuitPython device!",
-        )
+        session = adafruit_requests.Session(pool, sslctx)
 
         next_time = time.localtime()
 
         while True:
             next_time = wait_5m(next_time)
             led.value = True
-            # print(onboard_amb.value)
-            print("{:8.2f} lux".format(sensor.lux))
+            sensor_data = "{:8.2f} lux".format(sensor.lux)
+            print(sensor_data)
+
+            # Send data to Flask server
+            payload = {'light_value': sensor_data}
+            response = session.post('YOURSERVERADDRESS:5000/sensor', json=payload)
+            print('Server Response:', response.text)
 
             next_time = wait_5m(next_time)
             led.value = False
-            # print(onboard_amb.value)
-            print("{:8.2f} lux".format(sensor.lux))
+
     except Exception as e:
         print(e)
         time.sleep(5)
-        pass
+
