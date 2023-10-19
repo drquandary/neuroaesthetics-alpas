@@ -34,6 +34,7 @@ To update to the newest version of our code, run `./update.sh`.
 3) Write down your server address and use this for the next stage
 
 # Chip Data-collector 
-1) Edit the data collector code in code.py to send data to your server's address. You can test this easily in MU using the serial function: response = session.post('YOURSERVERADDRESS:5000/sensor', json=payload)
+1) Edit the data collector code in code.py to send data to your server's address: response = session.post('YOURSERVERADDRESS:5000/sensor', json=payload)
+2) You can test this easily in MU using the serial function
 
 
