@@ -29,7 +29,7 @@ And everything should work! The blue light should flash on or off every five min
 To update to the newest version of our code, run `./update.sh`.
 
 # Server Setup
-1) Use a service like Digital Ocean with Unbuntu. Set up a venv with python and add the server script (server.py) with something like VIM.
+1) Use a service like Digital Ocean with Ubuntu. Set up a venv with python and add the server script (server.py) with something like VIM.
 2) Make sure no firewall is blocking the server.
 3) Write down your server address and use this for the next stage
 
