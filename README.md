@@ -1,11 +1,13 @@
-# Penn Center for Neuroaesthetics Ambient Light Sensor
+# Penn Center for Neuroaesthetics Ambient Light Sensor with Simple Flask Server
 
 Written in CircuitPython for ease of maintenance from across the country.
 
-Currently tested on an Unexpected Maker Feather S3 & Adafruit BH1750 soldered so that `VIN 3Vo GND SCL SDA` on the BH1750 connect to `1 38 33 SCL SDA` on the Feather. Note that `ADDR` is left unsoldered and `3Vo`/`38` is unused but soldered anyway to avoid having to chop header pins in half.
+Currently tested on an Unexpected Maker Feather S3 & Adafruit BH1750 soldered so that `VIN 3Vo GND SCL SDA` on the BH1750 connects to `1 38 33 SCL SDA` on the Feather. Note that `ADDR` is left unsoldered and `3Vo`/`38` is unused but soldered anyway to avoid having to chop header pins in half.
 
 ## Setup
+The device needs configuration. Look at CircuitPython docs for that and make sure to download MU. To send light data, the device will need to be coded to collect and send data and also a server to receive it. 
 
+# Device Set up
 Obtain a CircuitPython-compatible microcontroller and copy everything in this folder into it, overwriting where applicable. Then, add a `secrets.py` file that looks like this:
 ```python
 secrets = {
@@ -25,3 +27,11 @@ With the above email and password, it would be `echo -ne '\0address@site.com\0S3
 And everything should work! The blue light should flash on or off every five minutes, alternating with each measurement.
 
 To update to the newest version of our code, run `./update.sh`.
+
+# Server Setup
+1) Use a service like Digital Ocean with Unbuntu. Set up a venv with python and add the server script (server.py) with something like VIM.
+2) Make sure no firewall is blocking the server.
+3) Write down your server address and use this for the next stage
+
+# Chip Data-collector 
+1) Edit the data collector code in code.py to send data to your server's address. You can test this easily in MU using the serial function. 
