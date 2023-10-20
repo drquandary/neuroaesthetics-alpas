@@ -1,6 +1,6 @@
 # Penn Center for Neuroaesthetics Ambient Light Sensor with Simple Flask Server
 
-Written in CircuitPython for ease of maintenance from across the country.
+Written in CircuitPython for ease of maintenance from across the country. Instead of SMTP, we used a Flask server given Google SMTP policy changed. 
 
 Currently tested on an Unexpected Maker Feather S3 & Adafruit BH1750 soldered so that `VIN 3Vo GND SCL SDA` on the BH1750 connects to `1 38 33 SCL SDA` on the Feather. Note that `ADDR` is left unsoldered and `3Vo`/`38` is unused but soldered anyway to avoid having to chop header pins in half.
 
